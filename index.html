@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Open Cinema - Watch Free Movies & Box Office Details</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #e11d48;
+      --text: #f8fafc;
+      --subtext: #94a3b8;
+      --green: #22c55e;
+      --red: #ef4444;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text);
+    }
+
+    /* 🎬 Hero Section with Blurred Collage Background */
+    .hero-header {
+      position: relative;
+      padding: 4rem 1rem 3rem 1rem;
+      text-align: center;
+      overflow: hidden;
+      border-bottom: 3px solid var(--accent);
+    }
+
+    /* Blur Background Posters Grid */
+    .hero-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      z-index: 1;
+      filter: blur(8px) brightness(0.35);
+      transform: scale(1.08); /* कडा ब्लर व्यवस्थित दिसण्यासाठी */
+    }
+
+    .hero-bg img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Header Content on Top of Blurred Background */
+    .hero-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    .brand-title {
+      font-size: 2.8rem;
+      font-weight: 800;
+      margin: 0;
+      letter-spacing: 1px;
+      color: #ffffff;
+      text-shadow: 0 4px 10px rgba(0,0,0,0.7);
+    }
+
+    .brand-title span {
+      color: var(--accent);
+    }
+
+    .tagline {
+      font-size: 1rem;
+      color: #cbd5e1;
+      margin-top: 5px;
+      margin-bottom: 1.5rem;
+      text-shadow: 0 2px 5px rgba(0,0,0,0.8);
+    }
+
+    .search-box {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      max-width: 550px;
+      margin: 0 auto;
+    }
+
+    input[type="text"] {
+      padding: 12px 18px;
+      width: 70%;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(5px);
+      color: #fff;
+      font-size: 16px;
+      outline: none;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    }
+
+    input[type="text"]::placeholder {
+      color: #94a3b8;
+    }
+
+    button {
+      padding: 12px 24px;
+      background-color: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 16px;
+      box-shadow: 0 4px 15px rgba(225, 29, 72, 0.4);
+      transition: transform 0.2s;
+    }
+
+    button:hover {
+      transform: scale(1.03);
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .movie-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    }
+
+    .movie-hero {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .poster {
+      width: 250px;
+      border-radius: 8px;
+    }
+
+    .details {
+      flex: 1;
+    }
+
+    .rating-badge {
+      display: inline-block;
+      background: #f59e0b;
+      color: #000;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-weight: bold;
+      margin-top: 5px;
+    }
+
+    .box-office {
+      margin-top: 2rem;
+      background: #0f172a;
+      padding: 1rem;
+      border-radius: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #334155;
+    }
+
+    .status-hit { color: var(--green); font-weight: bold; }
+    .status-flop { color: var(--red); font-weight: bold; }
+
+    .section-title {
+      margin-top: 2rem;
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 5px;
+    }
+
+    .cast-grid, .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 15px;
+      margin-top: 1rem;
+    }
+
+    .cast-card, .gallery-img {
+      background: #0f172a;
+      border-radius: 8px;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .cast-card img, .gallery-img img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+    }
+
+    .cast-info {
+      padding: 8px;
+      font-size: 12px;
+    }
+
+    iframe {
+      width: 100%;
+      height: 400px;
+      border: none;
+      border-radius: 8px;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="hero-header">
+    <!-- 🖼️ ५ मूव्हींचे ब्लर केलेले पोस्टर गॅलरी -->
+    <div class="hero-bg">
+      <img src="https://image.tmdb.org/t/p/w500/9Rj829R82281S38283.jpg" alt="Dhurandhar" onerror="this.src='https://image.tmdb.org/t/p/w500/w1M23284.jpg'">
+      <img src="https://image.tmdb.org/t/p/w500/A083723782928.jpg" alt="Krrish 3" onerror="this.src='https://image.tmdb.org/t/p/w500/y0238128.jpg'">
+      <img src="https://image.tmdb.org/t/p/w500/9A12378123789.jpg" alt="Baahubali" onerror="this.src='https://image.tmdb.org/t/p/w500/228137812.jpg'">
+      <img src="https://image.tmdb.org/t/p/w500/pI2378219.jpg" alt="Wolf of Wall Street" onerror="this.src='https://image.tmdb.org/t/p/w500/pE81293812.jpg'">
+      <img src="https://image.tmdb.org/t/p/w500/x123781239.jpg" alt="The Kerala Story" onerror="this.src='https://image.tmdb.org/t/p/w500/x78123912.jpg'">
+    </div>
+
+    <!-- 🔍 हेडर मजकूर आणि सर्च बार -->
+    <div class="hero-content">
+      <h1 class="brand-title">OPEN <span>CINEMA</span></h1>
+      <p class="tagline">Stream Free Movies & Explore Detailed Box Office Collection</p>
+      
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="कोणताही चित्रपट शोधा (उदा. Jawan, Krrish, Baahubali)..." value="Jawan" />
+        <button onclick="fetchMovieDetails()">Search</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div id="movieContainer" class="movie-card" style="display: none;">
+      
+      <!-- Hero Section -->
+      <div class="movie-hero">
+        <img id="poster" class="poster" src="" alt="Movie Poster" />
+        <div class="details">
+          <h2 id="title"></h2>
+          <p><strong>रिलीज तारीख:</strong> <span id="releaseDate"></span></p>
+          <p><strong>निर्माता (Producers):</strong> <span id="producers"></span></p>
+          <p><strong>ग्लोबल रेटिंग:</strong> <span id="rating" class="rating-badge"></span></p>
+          <p id="overview" style="color: var(--subtext); line-height: 1.5;"></p>
+        </div>
+      </div>
+
+      <!-- Box Office Section -->
+      <div class="box-office">
+        <h3>💰 बॉक्स ऑफिस रिपोर्ट व कमाई</h3>
+        <table>
+          <tr>
+            <th>बजेट</th>
+            <td id="budget"></td>
+          </tr>
+          <tr>
+            <th>पहिला दिवस (Day 1 Est.)</th>
+            <td id="day1"></td>
+          </tr>
+          <tr>
+            <th>दुसरा दिवस (Day 2 Est.)</th>
+            <td id="day2"></td>
+          </tr>
+          <tr>
+            <th>पहिला आठवडा (Week 1 Est.)</th>
+            <td id="week1"></td>
+          </tr>
+          <tr>
+            <th>ओव्हरऑल कलेक्शन (Worldwide)</th>
+            <td id="revenue"></td>
+          </tr>
+          <tr>
+            <th>स्टेटस (प्रॉफिट / लॉस)</th>
+            <td id="profitStatus"></td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- Trailer Section -->
+      <h3 class="section-title">🎬 अधिकृत ट्रेलर</h3>
+      <div id="trailerContainer"></div>
+
+      <!-- Cast Section -->
+      <h3 class="section-title">🎭 प्रमुख कलाकार (Cast)</h3>
+      <div id="castGrid" class="cast-grid"></div>
+
+      <!-- Stills / Gallery Section -->
+      <h3 class="section-title">📸 चित्रपटाचे फोटो (Stills)</h3>
+      <div id="galleryGrid" class="gallery-grid"></div>
+
+    </div>
+  </div>
+
+  <script>
+    // 🔑 TMDB API Key
+    const API_KEY = "ff808dcb43fbacde22df0521d92358cf";
+    const BASE_URL = "https://api.themoviedb.org/3";
+    const IMAGE_URL = "https://image.tmdb.org/t/p/w500";
+
+    // बॅकग्राउंडमधील ५ पोस्टर्स ऑटोमॅटिक लोड करण्यासाठी:
+    async function loadBackgroundPosters() {
+      const movies = ['Dhurandhar', 'Krrish 3', 'Baahubali', 'The Wolf of Wall Street', 'The Kerala Story'];
+      const bgImages = document.querySelectorAll('.hero-bg img');
+
+      movies.forEach(async (movieName, index) => {
+        try {
+          const res = await fetch(`${BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(movieName)}`);
+          const data = await res.json();
+          if (data.results && data.results[0] && data.results[0].poster_path) {
+            bgImages[index].src = `${IMAGE_URL}${data.results[0].poster_path}`;
+          }
+        } catch(e) {
+          console.log("Error loading bg poster", e);
+        }
+      });
+    }
+
+    async function fetchMovieDetails() {
+      const query = document.getElementById('searchInput').value;
+      if (!query) return;
+
+      try {
+        const searchRes = await fetch(`${BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}`);
+        const searchData = await searchRes.json();
+        
+        if (!searchData.results || !searchData.results.length) {
+          alert('चित्रपट सापडला नाही!');
+          return;
+        }
+
+        const movieId = searchData.results[0].id;
+        const movieRes = await fetch(`${BASE_URL}/movie/${movieId}?api_key=${API_KEY}&append_to_response=credits,images,videos`);
+        const movie = await movieRes.json();
+
+        displayData(movie);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        alert("माहिती लोड करताना अडचण आली.");
+      }
+    }
+
+    function displayData(movie) {
+      document.getElementById('movieContainer').style.display = 'block';
+
+      document.getElementById('title').innerText = movie.title;
+      document.getElementById('poster').src = movie.poster_path ? `${IMAGE_URL}${movie.poster_path}` : 'https://via.placeholder.com/250x375';
+      document.getElementById('releaseDate').innerText = movie.release_date || 'N/A';
+      document.getElementById('rating').innerText = `⭐ ${movie.vote_average.toFixed(1)} / 10`;
+      document.getElementById('overview').innerText = movie.overview;
+
+      const producers = movie.credits.crew
+        .filter(person => person.job === 'Producer')
+        .map(p => p.name)
+        .slice(0, 3)
+        .join(', ');
+      document.getElementById('producers').innerText = producers || 'माहिती उपलब्ध नाही';
+
+      const budget = movie.budget;
+      const revenue = movie.revenue;
+      
+      document.getElementById('budget').innerText = budget ? `$${(budget / 1000000).toFixed(1)}M (अंदाजे ₹${(budget * 0.083).toFixed(1)} Cr)` : 'N/A';
+      document.getElementById('revenue').innerText = revenue ? `$${(revenue / 1000000).toFixed(1)}M (अंदाजे ₹${(revenue * 0.083).toFixed(1)} Cr)` : 'N/A';
+
+      if (revenue > 0) {
+        document.getElementById('day1').innerText = `₹${(revenue * 0.083 * 0.12).toFixed(1)} Cr (अंदाजे)`;
+        document.getElementById('day2').innerText = `₹${(revenue * 0.083 * 0.10).toFixed(1)} Cr (अंदाजे)`;
+        document.getElementById('week1').innerText = `₹${(revenue * 0.083 * 0.50).toFixed(1)} Cr (अंदाजे)`;
+      } else {
+        document.getElementById('day1').innerText = 'N/A';
+        document.getElementById('day2').innerText = 'N/A';
+        document.getElementById('week1').innerText = 'N/A';
+      }
+
+      const statusElement = document.getElementById('profitStatus');
+      if (budget > 0 && revenue > 0) {
+        const profit = revenue - budget;
+        if (profit > 0) {
+          statusElement.innerHTML = `<span class="status-hit">HIT / PROFIT ($${(profit / 1000000).toFixed(1)}M)</span>`;
+        } else {
+          statusElement.innerHTML = `<span class="status-flop">FLOP / LOSS ($${(Math.abs(profit) / 1000000).toFixed(1)}M)</span>`;
+        }
+      } else {
+        statusElement.innerText = 'कलेक्शन माहिती अपूर्ण';
+      }
+
+      const trailerContainer = document.getElementById('trailerContainer');
+      const trailer = movie.videos.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
+      if (trailer) {
+        trailerContainer.innerHTML = `<iframe src="https://www.youtube.com/embed/${trailer.key}" allowfullscreen></iframe>`;
+      } else {
+        trailerContainer.innerHTML = '<p>ट्रेलर उपलब्ध नाही</p>';
+      }
+
+      const castGrid = document.getElementById('castGrid');
+      castGrid.innerHTML = '';
+      movie.credits.cast.slice(0, 6).forEach(actor => {
+        const photo = actor.profile_path ? `${IMAGE_URL}${actor.profile_path}` : 'https://via.placeholder.com/130x150';
+        castGrid.innerHTML += `
+          <div class="cast-card">
+            <img src="${photo}" alt="${actor.name}">
+            <div class="cast-info">
+              <strong>${actor.name}</strong><br>
+              <small style="color:var(--subtext);">${actor.character}</small>
+            </div>
+          </div>
+        `;
+      });
+
+      const galleryGrid = document.getElementById('galleryGrid');
+      galleryGrid.innerHTML = '';
+      movie.images.backdrops.slice(0, 4).forEach(img => {
+        galleryGrid.innerHTML += `
+          <div class="gallery-img">
+            <img src="${IMAGE_URL}${img.file_path}" alt="Still" style="height:100px;">
+          </div>
+        `;
+      });
+    }
+
+    window.onload = () => {
+      loadBackgroundPosters();
+      fetchMovieDetails();
+    };
+  </script>
+</body>
+</html>
